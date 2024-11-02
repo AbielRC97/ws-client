@@ -10,11 +10,12 @@ const addListeners = (client: Socket) => {
     const serverStatus = document.querySelector('#server-status')!;
     const clientslist = document.querySelector('#clients-ul')!;
     const formulario = document.querySelector<HTMLFormElement>('#formulario')!;
-    const message = document.querySelector<HTMLInputElement>('#message')!
-    client.on('connect', ()=> {
+    const message = document.querySelector<HTMLInputElement>('#message')!;
+    const messageList = document.querySelector<HTMLUListElement>('#message-ul')!;
+    client.on('connect', () => {
         serverStatus.innerHTML = "Online";
     });
-    client.on('disconnect', ()=> {
+    client.on('disconnect', () => {
         serverStatus.innerHTML = "Offline";
     });
     client.on('clients-updated', (clients: string[]) => {
@@ -27,10 +28,22 @@ const addListeners = (client: Socket) => {
         clientslist.innerHTML = clientsHTML;
     });
 
+    client.on('request-message', (payload: { id: string, fullName: string, message: string }) => {
+        const newMessage =  `
+            <li>
+                <strong>${payload.fullName}</strong>
+                <span>${payload.message}</span>
+            </li>
+        `;
+        const li = document.createElement('li');
+        li.innerHTML = newMessage;
+        messageList.append(li);
+    });
+
     formulario.addEventListener('submit', (event) => {
         event.preventDefault();
-        if(message.value.trim().length <= 0) return;
-        
+        if (message.value.trim().length <= 0) return;
+
         client.emit('send-message', {
             id: 'YO!',
             message: message.value
