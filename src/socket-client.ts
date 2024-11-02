@@ -1,28 +1,29 @@
 import { Manager, Socket } from "socket.io-client"
-
+let socket: Socket;
 export const connectToServer = (jwt: string) => {
     const maneger = new Manager(`http://localhost:3000/socket.io/socket.io.js`, {
         extraHeaders: {
             authentication: jwt
         }
     });
-    const socket = maneger.socket('/');
-    addListeners(socket);
+    socket?.removeAllListeners();
+    socket = maneger.socket('/');
+    addListeners();
 }
 
-const addListeners = (client: Socket) => {
+const addListeners = () => {
     const serverStatus = document.querySelector('#server-status')!;
     const clientslist = document.querySelector('#clients-ul')!;
     const formulario = document.querySelector<HTMLFormElement>('#formulario')!;
     const message = document.querySelector<HTMLInputElement>('#message')!;
     const messageList = document.querySelector<HTMLUListElement>('#message-ul')!;
-    client.on('connect', () => {
+    socket.on('connect', () => {
         serverStatus.innerHTML = "Online";
     });
-    client.on('disconnect', () => {
+    socket.on('disconnect', () => {
         serverStatus.innerHTML = "Offline";
     });
-    client.on('clients-updated', (clients: string[]) => {
+    socket.on('clients-updated', (clients: string[]) => {
         let clientsHTML = '';
         clients.forEach(id => {
             clientsHTML += `
@@ -32,7 +33,7 @@ const addListeners = (client: Socket) => {
         clientslist.innerHTML = clientsHTML;
     });
 
-    client.on('request-message', (payload: { id: string, fullName: string, message: string }) => {
+    socket.on('request-message', (payload: { id: string, fullName: string, message: string }) => {
         const newMessage =  `
             <li>
                 <strong>${payload.fullName}</strong>
@@ -48,7 +49,7 @@ const addListeners = (client: Socket) => {
         event.preventDefault();
         if (message.value.trim().length <= 0) return;
 
-        client.emit('send-message', {
+        socket.emit('send-message', {
             id: 'YO!',
             message: message.value
         });
