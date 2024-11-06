@@ -1,7 +1,7 @@
 import { Manager, Socket } from "socket.io-client"
 let socket: Socket;
 export const connectToServer = (jwt: string) => {
-    const maneger = new Manager(`http://localhost:3000/socket.io/socket.io.js`, {
+    const maneger = new Manager(`https://teslo-shop-abyrc.up.railway.app/socket.io/socket.io.js`, {
         extraHeaders: {
             authentication: jwt
         }
