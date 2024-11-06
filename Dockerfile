@@ -3,19 +3,19 @@ FROM node:18 AS builder
 
 WORKDIR /app
 
-# Copia los archivos package.json y package-lock.json primero para aprovechar la caché de Docker
+# Copia package.json y package-lock.json primero para instalar las dependencias
 COPY package.json package-lock.json ./
 
-# Elimina node_modules y package-lock.json para garantizar una instalación limpia
+# Elimina node_modules y package-lock.json si ya existen
 RUN rm -rf node_modules package-lock.json
 
-# Instala las dependencias, usando --legacy-peer-deps para evitar problemas con dependencias opcionales
+# Instala las dependencias con --legacy-peer-deps para evitar problemas con dependencias opcionales
 RUN npm install --legacy-peer-deps
 
-# Copia el resto de los archivos del proyecto
+# Copia el resto de los archivos
 COPY . ./
 
-# Ejecuta la construcción de la aplicación
+# Compila la aplicación
 RUN npm run build
 
 # Usa una imagen ligera para producción
